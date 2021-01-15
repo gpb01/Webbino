@@ -19,6 +19,11 @@
 
 #include <Webbino.h>
 
+// Authorization Data
+#define AUTH_REALM "Webbino"
+#define AUTH_USER "admin"
+#define AUTH_PASSWD "webbino"
+
 // Instantiate the WebServer and page storage
 WebServer webserver;
 FlashStorage flashStorage;
@@ -75,27 +80,6 @@ FlashStorage flashStorage;
 #endif
 
 
-/* Pin to control, make sure this makes sense:
- * - If using an Uno with the Ethernet shield, remember that it is driven
- *   through SPI, which means that pin 13 (i.e. the pin for LED_BUILTIN) is used
- *   by the SPI clock line, so put a led on a different pin.
- * - Use D0 on NodeMCU!
- * - On Teensy 4.1, pin 13 it's automatically chosen
- */
-#ifdef ARDUINO_TEENSY41
-const byte ledPin = 13;
-#else
-const byte ledPin = 7;
-#endif
-
-// Logic level turns the led on: on NodeMCU and with most relays, this should
-// be LOW
-const byte LED_ACTIVE_LEVEL = HIGH;
-
-// Pin state (True -> ON)
-boolean ledState = false;
-
-
 /******************************************************************************
  * DEFINITION OF PAGES                                                        *
  ******************************************************************************/
@@ -103,77 +87,11 @@ boolean ledState = false;
 #include "html.h"
 
 const Page page01 PROGMEM = {index_html_name, index_html, index_html_len};
+const Page page02 PROGMEM = {logo_gif_name, logo_gif, logo_gif_len};
 
 const Page* const pages[] PROGMEM = {
 	&page01,
-	NULL
-};
-
-
-/******************************************************************************
- * PAGE FUNCTIONS                                                             *
- ******************************************************************************/
-
-#ifndef ENABLE_PAGE_FUNCTIONS
-#error Please define ENABLE_PAGE_FUNCTIONS in webbino_config.h
-#endif
-
-HttpStatusCode ledToggle (HttpRequest& request) {
-	char *param;
-
-	param = request.get_parameter (F("state"));
-	if (strlen (param) > 0) {
-		if (strcmp_P (param, PSTR ("on")) == 0) {
-			ledState = true;
-			digitalWrite (ledPin, LED_ACTIVE_LEVEL);
-		} else {
-			ledState = false;
-			digitalWrite (ledPin, !LED_ACTIVE_LEVEL);
-		}
-	}
-	return HTTP_OK;
-}
-
-FlashFileFuncAssoc (indexAss, index_html_name, ledToggle);
-
-FileFuncAssociationArray associations[] PROGMEM = {
-	&indexAss,
-	NULL
-};
-
-
-/******************************************************************************
- * DEFINITION OF TAGS                                                         *
- ******************************************************************************/
-
-#define REP_BUFFER_LEN 32
-char replaceBuffer[REP_BUFFER_LEN];
-PString pBuffer (replaceBuffer, REP_BUFFER_LEN);
-
-PString& evaluate_onoff_checked (void *data) {
-	boolean st = reinterpret_cast<int> (data);
-	if (ledState == st) {
-		pBuffer.print ("checked");
-	}
-
-	return pBuffer;
-}
-
-PString& evaluate_webbino_version (void *data __attribute__ ((unused))) {
-	pBuffer.print (WEBBINO_VERSION);
-
-	return pBuffer;
-}
-
-
-EasyReplacementTag (tagStateOnChecked, ST_ON_CHK, evaluate_onoff_checked, true);
-EasyReplacementTag (tagStateOffChecked, ST_OFF_CHK, evaluate_onoff_checked, false);
-EasyReplacementTag (tagWebbinoVer, WEBBINO_VER, evaluate_webbino_version);
-
-EasyReplacementTagArray tags[] PROGMEM = {
-	&tagStateOnChecked,
-	&tagStateOffChecked,
-	&tagWebbinoVer,
+	&page02,
 	NULL
 };
 
@@ -181,6 +99,24 @@ EasyReplacementTagArray tags[] PROGMEM = {
 /******************************************************************************
  * MAIN STUFF                                                                 *
  ******************************************************************************/
+
+#ifndef ENABLE_HTTPAUTH
+#error "HTTP Auth must be enabed in Webbino"
+#endif
+
+/* This function is called whenever an access is attempted. It must validate the
+ * provided username and password and return true if the access is to be
+ * allowed, false otherwise.
+ */
+boolean authorize (const char *user, const char *passwd) {
+	Serial.print (F("Validating username \""));
+	Serial.print (user);
+	Serial.print (F("\" with password \""));
+	Serial.print (passwd);
+	Serial.println ("\"");
+	return strcmp_P (user, PSTR (AUTH_USER)) == 0 &&
+	       strcmp_P (passwd, PSTR (AUTH_PASSWD)) == 0;
+}
 
 void setup () {
 	Serial.begin (115200);
@@ -211,27 +147,22 @@ void setup () {
 		Serial.println (F("Failed to get configuration from DHCP"));
 		while (42)
 			;
+	} else {
+		Serial.println (F("DHCP configuration done:"));
+		Serial.print (F("- IP: "));
+		Serial.println (netint.getIP ());
+		Serial.print (F("- Netmask: "));
+		Serial.println (netint.getNetmask ());
+		Serial.print (F("- Default Gateway: "));
+		Serial.println (netint.getGateway ());
+
+		webserver.begin (netint);
+
+		flashStorage.begin (pages);
+		webserver.addStorage (flashStorage);
+
+		webserver.enableAuth (AUTH_REALM, authorize);
 	}
-
-
-	Serial.println (F("DHCP configuration done:"));
-	Serial.print (F("- IP: "));
-	Serial.println (netint.getIP ());
-	Serial.print (F("- Netmask: "));
-	Serial.println (netint.getNetmask ());
-	Serial.print (F("- Default Gateway: "));
-	Serial.println (netint.getGateway ());
-
-	webserver.begin (netint);
-	webserver.enableReplacementTags (tags);
-
-	flashStorage.begin (pages);
-	webserver.addStorage (flashStorage);
-	webserver.associateFunctions (associations);
-
-	// Prepare pin
-	digitalWrite (ledPin, !LED_ACTIVE_LEVEL);		// Off
-	pinMode (ledPin, OUTPUT);
 }
 
 void loop () {
