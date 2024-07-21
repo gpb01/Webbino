@@ -76,13 +76,19 @@ FlashStorage flashStorage;
 
 
 /* Pin to control, make sure this makes sense:
- * - If using an Uno with the Ethernet shield, remember that it is driven
- *   through SPI, which means that pin 13 (i.e. the pin for LED_BUILTIN) is used
- *   by the SPI clock line, so put a led on a different pin.
- * - Use D0 on NodeMCU!
- * - On Teensy 4.1, pin 13 it's automatically chosen
- */
-#ifdef ARDUINO_TEENSY41
+   - If using an Uno with the Ethernet shield, remember that it is driven
+     through SPI, which means that pin 13 (i.e. the pin for LED_BUILTIN) is used
+     by the SPI clock line, so put a led on a different pin.
+   - Use D0 on NodeMCU!
+   - On Teensy 4.1, pin 13 it's automatically chosen
+   - On WeAct Ra4M1 board, pin 21 it's automatically chosen
+   - On Arduino UNO R4 WiFi, pin 13 can be used and it's automatically chosen
+*/
+#if defined ( ARDUINO_TEENSY41 )
+const byte ledPin = 13;
+#elif defined ( WEACT_BOARD )
+const byte ledPin = 21;
+#elif defined ( ARDUINO_UNOR4_WIFI )
 const byte ledPin = 13;
 #else
 const byte ledPin = 7;

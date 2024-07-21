@@ -15,6 +15,10 @@
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
  *   along with Webbino. If not, see <http://www.gnu.org/licenses/>.       *
+ *                                                                         *
+ *   gpb01 - add WEBBINO_USE_WIFIS3 network device                         *
+ *   gpb01 - add WEBBINO_USE_WIFININA network device                       *
+ *                                                                         *
  ***************************************************************************/
 
 #ifndef WEBBINOCOMMON_H_
@@ -34,7 +38,7 @@
  * Please enable *only one* of the following,
  * corresponding to the network device you will be using
  */
-#define WEBBINO_USE_WIZ5100
+//~ #define WEBBINO_USE_WIZ5100
 //~ #define WEBBINO_USE_WIZ5500
 //~ #define WEBBINO_USE_ENC28J60
 //~ #define WEBBINO_USE_ENC28J60_UIP
@@ -42,6 +46,8 @@
 //~ #define WEBBINO_USE_ESP8266_STANDALONE
 //~ #define WEBBINO_USE_WIFI
 //~ #define WEBBINO_USE_WIFI101
+//~ #define WEBBINO_USE_WIFIS3
+#define WEBBINO_USE_WIFININA
 //~ #define WEBBINO_USE_FISHINO
 //~ #define WEBBINO_USE_DIGIFI
 //~ #define WEBBINO_USE_TEENSY41_NATIVE

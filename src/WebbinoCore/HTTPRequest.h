@@ -15,6 +15,9 @@
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
  *   along with Webbino. If not, see <http://www.gnu.org/licenses/>.       *
+ *                                                                         *
+ *   gpb01 - add external strlcpy() for Renesas architecture               *
+ *                                                                         *
  ***************************************************************************/
 
 #ifndef _HTTPREQUESTPARSER_H_
@@ -22,6 +25,10 @@
 
 #include <webbino_config.h>
 #include <webbino_debug.h>
+
+#if defined ( ARDUINO_ARCH_RENESAS )
+#include "strlcpy.h"
+#endif
 
 
 class HttpRequest {

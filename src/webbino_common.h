@@ -15,13 +15,16 @@
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
  *   along with Webbino. If not, see <http://www.gnu.org/licenses/>.       *
+ *                                                                         *
+ *   gpb01 - updated version to match the library version                  *
+ *                                                                         *
  ***************************************************************************/
 
 #ifndef WEBBINO_COMMON_H_INCLUDED
 #define WEBBINO_COMMON_H_INCLUDED
 
 // Don't touch :)
-#define WEBBINO_VERSION "0.9.97"
+#define WEBBINO_VERSION "0.9.99"
 
 // Implementation of std::swap() for copy-and-swap
 namespace mystd {

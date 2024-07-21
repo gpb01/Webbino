@@ -15,6 +15,9 @@
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
  *   along with Webbino. If not, see <http://www.gnu.org/licenses/>.       *
+ *                                                                         *
+ *   gpb01 - use common Ethernet.h library for WIZ5100 and W5500           *
+ *                                                                         *
  ***************************************************************************/
 
 #ifndef _WEBSERVER5x00_H_
@@ -28,7 +31,8 @@
 #if defined (WEBBINO_USE_WIZ5100)
 	#include <Ethernet.h>
 #elif defined (WEBBINO_USE_WIZ5500)
-	#include <Ethernet2.h>
+//	#include <Ethernet2.h>
+	#include <Ethernet.h>
 #elif defined (WEBBINO_USE_ENC28J60_UIP)
 	#include <UIPEthernet.h>
 #elif defined (WEBBINO_USE_TEENSY41_NATIVE)

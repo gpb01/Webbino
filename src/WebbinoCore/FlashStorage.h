@@ -15,6 +15,9 @@
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
  *   along with Webbino. If not, see <http://www.gnu.org/licenses/>.       *
+ *                                                                         *
+ *   gpb01 - set 'length' data type following __SIZEOF_INT__               *
+ *                                                                         *
  ***************************************************************************/
 
 #include <Arduino.h>
@@ -26,7 +29,14 @@ typedef const byte* PGM_BYTES_P;
 struct Page {
 	PGM_P name;
 	PGM_BYTES_P content;
-	unsigned int length;
+
+#if __SIZEOF_INT__ == 2
+    unsigned int length;
+#elif __SIZEOF_INT__ == 4	
+    unsigned long length;
+#else
+    #error "Mmmmh... Compiling on a weird architecture?"
+#endif
 
 	// Methods that (try to) hide the complexity of accessing PROGMEM data
 	PGM_P getName () const {

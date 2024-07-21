@@ -15,6 +15,10 @@
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
  *   along with Webbino. If not, see <http://www.gnu.org/licenses/>.       *
+ *                                                                         *
+ *   gpb01 - added support for "Arduino UNO R4 WiFi" WiFiS3 library.       *
+ *   gpb01 - added support for WiFiNINA library.                           *
+ *                                                                         *
  ***************************************************************************/
 
 #ifndef _WEBSERVER8266_H_
@@ -22,8 +26,8 @@
 
 #include <webbino_config.h>
 
-#if defined (WEBBINO_USE_WIFI) || defined (WEBBINO_USE_WIFI101) || \
-	  defined (WEBBINO_USE_ESP8266) || defined (WEBBINO_USE_ESP8266_STANDALONE)
+#if defined (WEBBINO_USE_WIFI) || defined (WEBBINO_USE_WIFI101) || defined (WEBBINO_USE_WIFIS3) || \
+	defined (WEBBINO_USE_WIFININA) || defined (WEBBINO_USE_ESP8266) || defined (WEBBINO_USE_ESP8266_STANDALONE)
 
 #if defined (WEBBINO_USE_WIFI)
 #include <WiFi.h>
@@ -33,6 +37,19 @@ typedef WiFiServer InternalServer;
 
 #elif defined (WEBBINO_USE_WIFI101)
 #include <WiFi101.h>
+
+typedef WiFiClient InternalClient;
+typedef WiFiServer InternalServer;
+
+#elif defined (WEBBINO_USE_WIFIS3)
+#include <WiFiS3.h>
+
+typedef WiFiClient InternalClient;
+typedef WiFiServer InternalServer;
+
+#elif defined (WEBBINO_USE_WIFININA)
+#include <SPI.h>
+#include <WiFiNINA.h>
 
 typedef WiFiClient InternalClient;
 typedef WiFiServer InternalServer;
@@ -86,8 +103,9 @@ private:
 public:
 	NetworkInterfaceWiFi ();
 
-#if defined (WEBBINO_USE_WIFI) || defined (WEBBINO_USE_WIFI101) || \
-      defined (WEBBINO_USE_ESP8266_STANDALONE)
+#if defined (WEBBINO_USE_WIFI) || defined (WEBBINO_USE_WIFI101) || defined (WEBBINO_USE_WIFIS3) || \
+    defined (WEBBINO_USE_WIFININA) || defined (WEBBINO_USE_ESP8266_STANDALONE)
+		
 	boolean begin (const char *_ssid, const char *_password);
 
 	boolean begin (const char *_ssid, const char *_password, IPAddress ip, IPAddress mask, IPAddress gw, IPAddress dns);

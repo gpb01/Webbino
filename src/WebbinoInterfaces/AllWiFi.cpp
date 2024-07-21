@@ -15,12 +15,17 @@
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
  *   along with Webbino. If not, see <http://www.gnu.org/licenses/>.       *
+ *                                                                         *
+ *   gpb01 - added support for "Arduino UNO R4 WiFi" WiFiS3 library.       *
+ *   gpb01 - added support for WiFiNINA library.                           *
+ *                                                                         *
  ***************************************************************************/
 
 /* This backend handles the following network interfaces:
  * Arduino + Official WiFi Shield (Untested)
  * Arduino + Official WiFi01 Shield (Untested)
  * Arduino MKR1000 (Untested)
+ * Arduino UNO R4 WiFi
  * Arduino + WiFiEsp (+ ESP8266)
  * ESP8266 Standalone
  * ESP32 Standalone
@@ -28,8 +33,8 @@
 
 #include "AllWiFi.h"
 
-#if defined (WEBBINO_USE_WIFI) || defined (WEBBINO_USE_WIFI101) || \
-	  defined (WEBBINO_USE_ESP8266) || defined (WEBBINO_USE_ESP8266_STANDALONE)
+#if defined (WEBBINO_USE_WIFI) || defined (WEBBINO_USE_WIFI101) || defined (WEBBINO_USE_WIFIS3) || \
+	defined (WEBBINO_USE_WIFININA) || defined (WEBBINO_USE_ESP8266) || defined (WEBBINO_USE_ESP8266_STANDALONE)
 
 #include "webbino_debug.h"
 
@@ -59,8 +64,8 @@ byte NetworkInterfaceWiFi::retBuffer[6];
 NetworkInterfaceWiFi::NetworkInterfaceWiFi (): server (80) {
 }
 
-#if defined (WEBBINO_USE_WIFI) || defined (WEBBINO_USE_WIFI101) || \
-	  defined (WEBBINO_USE_ESP8266_STANDALONE)
+#if defined (WEBBINO_USE_WIFI) || defined (WEBBINO_USE_WIFI101) || defined (WEBBINO_USE_WIFIS3) || \
+	defined (WEBBINO_USE_WIFININA) || defined (WEBBINO_USE_ESP8266_STANDALONE)
 boolean NetworkInterfaceWiFi::begin (const char *_ssid, const char *_password) {
 #elif defined (WEBBINO_USE_ESP8266)
 boolean NetworkInterfaceWiFi::begin (Stream& _serial, const char *_ssid, const char *_password) {
@@ -117,7 +122,9 @@ boolean NetworkInterfaceWiFi::begin (const char *_ssid, const char *_password, I
 #endif
 
 	// Set IP configuration
-#if (defined (WEBBINO_USE_WIFI) && defined (ARDUINO_ARCH_AVR)) || defined (WEBBINO_USE_WIFI101)
+
+#if (defined (WEBBINO_USE_WIFI) && defined (ARDUINO_ARCH_AVR)) || defined (WEBBINO_USE_WIFI101) || \
+	defined (WEBBINO_USE_WIFININA) || defined (WEBBINO_USE_WIFIS3)
 	// The original Arduino API has this parameter order and returns nothing
 	WiFi.config (ip, dns, gw, mask);
 	if (false) {
@@ -317,7 +324,12 @@ IPAddress NetworkInterfaceWiFi::getGateway () {
 }
 
 IPAddress NetworkInterfaceWiFi::getDns() {
+#if defined (WEBBINO_USE_WIFININA)
+	/* NO getDNS on WiFiNINA, return 0.0.0.0 */
+    return IPAddress(0, 0, 0, 0);
+#else
 	return WiFi.dnsIP ();
+#endif
 }
 
 #endif
